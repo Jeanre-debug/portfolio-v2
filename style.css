@@ -1,4 +1,142 @@
 /*=============== VARIABLES ===============*/
+[data-theme="dark"] {
+    --light-color: #1a1a2e;  
+    --dark-color: #f8f9fa;   
+    --grey-color: #adb5bd;
+    --light-grey: #2c2c3a;   
+    
+    /* Additional colors for dark mode */
+    --card-bg: #2c2c3a;      
+    --border-color: #444464; 
+}
+
+/* Fix dark mode text colors for all headings */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .project-title,
+[data-theme="dark"] label {
+    color: var(--dark-color);
+}
+
+/* Fix project card text color in dark mode */
+[data-theme="dark"] .project-card {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .project-card .project-title {
+    color: var(--dark-color);
+}
+
+[data-theme="dark"] .project-card:hover .project-title {
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .project-card .project-desc {
+    color: var(--grey-color);
+}
+
+/* Fix contact form in dark mode */
+[data-theme="dark"] .contact-form-container,
+[data-theme="dark"] .contact-card,
+[data-theme="dark"] .contact-social {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .contact-form-container .form-header h3,
+[data-theme="dark"] .contact-card h3,
+[data-theme="dark"] .contact-social h3 {
+    color: var(--dark-color);
+}
+
+/* Fix testimonials in dark mode */
+[data-theme="dark"] .testimonial-card {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .testimonial-author h4 {
+    color: var(--dark-color);
+}
+
+/* Fix skills section in dark mode */
+[data-theme="dark"] .skills-text h3 {
+    color: var(--dark-color);
+}
+
+/* Fix spacing in project cards */
+.project-info {
+    padding: 1.5rem;
+    min-height: 170px; /* Ensure consistent height for all cards */
+    display: flex;
+    flex-direction: column;
+}
+
+.project-desc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
+}
+
+/* Fix skill card spacing */
+.skill-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 240px;
+}
+
+.skill-card p {
+    flex-grow: 1;
+}
+
+/* Improve testimonial card spacing */
+.testimonial-card {
+    min-height: 250px;
+}
+
+/* Dark mode style for filter buttons */
+[data-theme="dark"] .filter-btn {
+    color: var(--grey-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn:hover,
+[data-theme="dark"] .filter-btn.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+/* Fix section spacing */
+.section {
+    padding: var(--section-spacing) 0;
+    position: relative;
+}
+
+/* Fix form element colors in dark mode */
+[data-theme="dark"] .form-group input, 
+[data-theme="dark"] .form-group textarea {
+    background-color: #2c2c3a;
+    border-color: #444464;
+    color: var(--dark-color);
+}
+
+/* Remove the hardcoded color override for various headings */
+.project-title,
+h4,
+h3,
+label {
+    color: inherit;
+}
+
+
+
 :root {
     --primary-color: #4361ee;
     --secondary-color: #3a0ca3;
