@@ -205,7 +205,7 @@ label {
 
 /* Additional dark mode styles */
 [data-theme="dark"] .hero {
-    background: linear-gradient(135deg, #1a1a2e 0%, #3a0ca3 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #411b9a 100%);
 }
 
 [data-theme="dark"] #header.scrolled {
