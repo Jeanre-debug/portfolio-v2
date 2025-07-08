@@ -1,5 +1,117 @@
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true,
+        offset: 100
+    });
+
+    // Initialize Particles.js
+    particlesJS('particles-js', {
+        particles: {
+            number: {
+                value: 80,
+                density: {
+                    enable: true,
+                    value_area: 800
+                }
+            },
+            color: {
+                value: '#ffffff'
+            },
+            shape: {
+                type: 'circle',
+                stroke: {
+                    width: 0,
+                    color: '#000000'
+                }
+            },
+            opacity: {
+                value: 0.5,
+                random: false,
+                anim: {
+                    enable: false,
+                    speed: 1,
+                    opacity_min: 0.1,
+                    sync: false
+                }
+            },
+            size: {
+                value: 3,
+                random: true,
+                anim: {
+                    enable: false,
+                    speed: 40,
+                    size_min: 0.1,
+                    sync: false
+                }
+            },
+            line_linked: {
+                enable: true,
+                distance: 150,
+                color: '#ffffff',
+                opacity: 0.4,
+                width: 1
+            },
+            move: {
+                enable: true,
+                speed: 6,
+                direction: 'none',
+                random: false,
+                straight: false,
+                out_mode: 'out',
+                bounce: false,
+                attract: {
+                    enable: false,
+                    rotateX: 600,
+                    rotateY: 1200
+                }
+            }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: {
+                    enable: true,
+                    mode: 'repulse'
+                },
+                onclick: {
+                    enable: true,
+                    mode: 'push'
+                },
+                resize: true
+            },
+            modes: {
+                grab: {
+                    distance: 400,
+                    line_linked: {
+                        opacity: 1
+                    }
+                },
+                bubble: {
+                    distance: 400,
+                    size: 40,
+                    duration: 2,
+                    opacity: 8,
+                    speed: 3
+                },
+                repulse: {
+                    distance: 200,
+                    duration: 0.4
+                },
+                push: {
+                    particles_nb: 4
+                },
+                remove: {
+                    particles_nb: 2
+                }
+            }
+        },
+        retina_detect: true
+    });
+
     // Preloader
     setTimeout(function() {
         const preloader = document.querySelector('.preloader');
@@ -8,6 +120,71 @@ document.addEventListener('DOMContentLoaded', function() {
         // Enable body scroll
         document.body.style.overflow = 'visible';
     }, 1500);
+
+    // Animated Counter for Stats
+    function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        
+        function updateCounter() {
+            start += increment;
+            if (start < target) {
+                element.textContent = Math.floor(start);
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.textContent = target;
+            }
+        }
+        updateCounter();
+    }
+
+    // Animate skill bars
+    function animateSkillBars() {
+        const skillBars = document.querySelectorAll('.skill-fill');
+        skillBars.forEach(bar => {
+            const level = bar.getAttribute('data-level');
+            bar.style.width = level + '%';
+        });
+    }
+
+    // Animate counters when in view
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumbers = entry.target.querySelectorAll('.stat-number');
+                statNumbers.forEach(stat => {
+                    const target = parseInt(stat.getAttribute('data-target'));
+                    animateCounter(stat, target);
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe stats section
+    const statsSection = document.querySelector('.stats-section');
+    if (statsSection) {
+        observer.observe(statsSection);
+    }
+
+    // Observe skills section for skill bars
+    const skillsSection = document.querySelector('.skills');
+    if (skillsSection) {
+        const skillsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateSkillBars();
+                    skillsObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        skillsObserver.observe(skillsSection);
+    }
 
     // Cursor effects
     const cursor = document.querySelector('.cursor');
@@ -203,39 +380,31 @@ document.addEventListener('DOMContentLoaded', function() {
         
         navItems.forEach(item => {
             item.classList.remove('active');
-            if (item.getAttribute('href') === `#${current}`) {
+            if (item.getAttribute('href') === '#' + current) {
                 item.classList.add('active');
             }
         });
     });
 
-    // Projects filter
+    // Project filtering
     const filterBtns = document.querySelectorAll('.filter-btn');
     const projectCards = document.querySelectorAll('.project-card');
     
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             // Remove active class from all buttons
-            filterBtns.forEach(btn => btn.classList.remove('active'));
-            
+            filterBtns.forEach(b => b.classList.remove('active'));
             // Add active class to clicked button
             this.classList.add('active');
             
-            const filter = this.dataset.filter;
+            const filter = this.getAttribute('data-filter');
             
             projectCards.forEach(card => {
-                if (filter === 'all' || card.dataset.category === filter) {
+                if (filter === 'all' || card.getAttribute('data-category') === filter) {
                     card.style.display = 'block';
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 300);
+                    card.style.animation = 'fadeIn 0.5s ease';
                 } else {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        card.style.display = 'none';
-                    }, 300);
+                    card.style.display = 'none';
                 }
             });
         });
@@ -297,8 +466,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Animate on scroll into view
-    const skillsSection = document.querySelector('.skills');
-    
     if (skillsSection) {
         const skillsObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -313,35 +480,103 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Contact form handling
-    const contactForm = document.getElementById('contact-form');
-    const successMessage = document.querySelector('.success-message');
-    const errorMessage = document.querySelector('.error-message');
-    
+    const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Get form data
             const formData = new FormData(this);
-            const formDataObj = {};
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const subject = formData.get('subject');
+            const message = formData.get('message');
             
-            formData.forEach((value, key) => {
-                formDataObj[key] = value;
-            });
+            // Simple validation
+            if (!name || !email || !subject || !message) {
+                showFormStatus('error', 'Please fill in all fields.');
+                return;
+            }
             
-            // Simulate form submission
-            setTimeout(function() {
-                successMessage.style.display = 'block';
-                errorMessage.style.display = 'none';
-                
-                // Reset form
-                contactForm.reset();
-                
-                // Hide success message after 5 seconds
-                setTimeout(function() {
-                    successMessage.style.display = 'none';
-                }, 5000);
-            }, 1500);
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showFormStatus('error', 'Please enter a valid email address.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span>Sending...</span><i class="fas fa-spinner fa-spin"></i>';
+            submitBtn.disabled = true;
+            
+            // Prepare email data
+            const emailData = {
+                to: 'jeanreotto12@gmail.com',
+                from: email,
+                subject: `Portfolio Contact: ${subject}`,
+                message: `
+                    Name: ${name}
+                    Email: ${email}
+                    Subject: ${subject}
+                    
+                    Message:
+                    ${message}
+                `
+            };
+            
+            // Try EmailJS first, fallback to mailto if not configured
+            if (typeof emailjs !== 'undefined') {
+                emailjs.send('service_id', 'template_id', emailData)
+                    .then(function(response) {
+                        showFormStatus('success', 'Message sent successfully! I\'ll get back to you soon.');
+                        contactForm.reset();
+                    })
+                    .catch(function(error) {
+                        // Fallback to mailto
+                        sendViaMailto(name, email, subject, message);
+                    })
+                    .finally(function() {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+            } else {
+                // Fallback to mailto
+                sendViaMailto(name, email, subject, message);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
         });
     }
+
+    function showFormStatus(type, message) {
+        const statusDiv = document.querySelector('.form-status');
+        statusDiv.innerHTML = `
+            <div class="${type}-message">
+                <i class="fas fa-${type === 'success' ? 'check' : 'times'}-circle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            statusDiv.innerHTML = '';
+        }, 5000);
+    }
+
+    function sendViaMailto(name, email, subject, message) {
+        const mailtoLink = `mailto:jeanreotto12@gmail.com?subject=Portfolio Contact: ${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}%0D%0AEmail: ${email}%0D%0A%0D%0AMessage:%0D%0A${message}`)}`;
+        window.open(mailtoLink, '_blank');
+        showFormStatus('success', 'Opening email client. Please send the email manually.');
+    }
+
+    // Add fadeIn animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
 });
