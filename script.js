@@ -1,3 +1,16 @@
+// --- THEME: Apply saved theme instantly on page load (before DOMContentLoaded) ---
+(function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.body.dataset.theme = savedTheme;
+        // Set icon immediately if possible
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+            themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        }
+    }
+})();
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize AOS
@@ -284,60 +297,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeToggle = document.querySelector('.theme-toggle');
     const body = document.querySelector('body');
     
-    themeToggle.addEventListener('click', function() {
-        body.dataset.theme = body.dataset.theme === 'dark' ? 'light' : 'dark';
-        
-        // Change icon
-        if (body.dataset.theme === 'dark') {
-            this.innerHTML = '<i class="fas fa-sun"></i>';
-        } else {
-            this.innerHTML = '<i class="fas fa-moon"></i>';
-        }
-        
-        // Save theme preference
-        localStorage.setItem('theme', body.dataset.theme);
-    });
+    // --- THEME: Add fade transition for theme changes ---
+    body.style.transition = 'background-color 0.5s, color 0.5s';
     
-    // Check saved theme
-    if (localStorage.getItem('theme') === 'dark') {
-        body.dataset.theme = 'dark';
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    // --- HERO: Animate hero section entrance with Intersection Observer ---
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+        heroSection.style.opacity = 0;
+        heroSection.style.transform = 'translateY(40px)';
+        const heroObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    heroSection.style.transition = 'opacity 1s cubic-bezier(.77,0,.18,1), transform 1s cubic-bezier(.77,0,.18,1)';
+                    heroSection.style.opacity = 1;
+                    heroSection.style.transform = 'translateY(0)';
+                    observer.unobserve(heroSection);
+                }
+            });
+        }, { threshold: 0.5 });
+        heroObserver.observe(heroSection);
     }
 
-    // Typewriter effect
+    // --- HERO: Polish typewriter effect for smoother, more human typing ---
     const typewriterElement = document.querySelector('.typewriter');
     if (typewriterElement) {
         const words = typewriterElement.dataset.words.split(', ');
         let wordIndex = 0;
         let charIndex = 0;
         let isDeleting = false;
-        let typeSpeed = 100;
-        
+        let typeSpeed = 120;
         function type() {
             const currentWord = words[wordIndex];
-            
             if (isDeleting) {
                 typewriterElement.textContent = currentWord.substring(0, charIndex - 1);
                 charIndex--;
-                typeSpeed = 50;
+                typeSpeed = 60 + Math.random() * 40;
             } else {
                 typewriterElement.textContent = currentWord.substring(0, charIndex + 1);
                 charIndex++;
-                typeSpeed = 100;
+                typeSpeed = 120 + Math.random() * 60;
             }
-            
             if (!isDeleting && charIndex === currentWord.length) {
                 isDeleting = true;
-                typeSpeed = 1000; // Pause at the end
+                typeSpeed = 1200;
             } else if (isDeleting && charIndex === 0) {
                 isDeleting = false;
                 wordIndex = (wordIndex + 1) % words.length;
-                typeSpeed = 500; // Pause before typing new word
+                typeSpeed = 600;
             }
-            
             setTimeout(type, typeSpeed);
         }
-        
         setTimeout(type, 1000);
     }
 
@@ -579,4 +588,230 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(style);
+
+    // --- PROJECT MODAL LOGIC ---
+    const modal = document.getElementById('project-modal');
+    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
+    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+    const modalBody = modal ? modal.querySelector('.modal-body') : null;
+
+    function openProjectModal(card) {
+        if (!modal || !modalBody) return;
+        // Extract info from card
+        const imgSrc = card.querySelector('.project-img img')?.src;
+        const title = card.querySelector('.project-title')?.textContent;
+        const desc = card.querySelector('.project-desc')?.textContent;
+        const tags = Array.from(card.querySelectorAll('.project-tags span')).map(t => t.textContent);
+        const links = Array.from(card.querySelectorAll('.project-link'));
+        // Build modal content
+        let html = '';
+        if (imgSrc) html += `<img src="${imgSrc}" alt="${title}" class="modal-project-img">`;
+        if (title) html += `<h2 class="modal-project-title">${title}</h2>`;
+        if (tags.length) html += `<div class="modal-project-tags">${tags.map(t => `<span>${t}</span>`).join(' ')}</div>`;
+        if (desc) html += `<p class="modal-project-desc">${desc}</p>`;
+        if (links.length) {
+            html += '<div class="modal-project-links">';
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                const icon = link.innerHTML;
+                const title = link.getAttribute('title') || '';
+                html += `<a href="${href}" target="_blank" rel="noopener" title="${title}">${icon}</a>`;
+            });
+            html += '</div>';
+        }
+        modalBody.innerHTML = html;
+        modal.style.display = 'block';
+        setTimeout(() => { modal.classList.add('open'); }, 10);
+        document.body.style.overflow = 'hidden';
+    }
+    function closeProjectModal() {
+        if (!modal) return;
+        modal.classList.remove('open');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+        document.body.style.overflow = '';
+    }
+    // Attach click listeners to project cards
+    document.querySelectorAll('.project-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Only open modal if not clicking a project link
+            if (e.target.closest('.project-link')) return;
+            openProjectModal(card);
+        });
+    });
+    // Close modal on overlay/click/ESC
+    if (modalOverlay) modalOverlay.addEventListener('click', closeProjectModal);
+    if (modalClose) modalClose.addEventListener('click', closeProjectModal);
+    document.addEventListener('keydown', function(e) {
+        if (modal && modal.style.display === 'block' && (e.key === 'Escape' || e.key === 'Esc')) {
+            closeProjectModal();
+        }
+    });
+
+    // --- DYNAMIC PROJECTS RENDERING ---
+    const projectsGrid = document.getElementById('projects-grid');
+    let allProjects = [];
+    function renderProjects(projects) {
+        if (!projectsGrid) return;
+        projectsGrid.innerHTML = '';
+        projects.forEach((project, idx) => {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            card.setAttribute('data-category', project.category);
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', 100 + idx * 100);
+            card.innerHTML = `
+                <div class="project-img">
+                    <img src="${project.image.startsWith('/') ? project.image : '/' + project.image}" alt="${project.title}">
+                    <div class="project-overlay">
+                        <div class="project-links">
+                            ${project.links.map(link => `<a href="${link.url}" class="project-link" title="${link.title}">${link.icon}</a>`).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <div class="project-tags">
+                        ${project.tags.map(tag => `<span>${tag}</span>`).join('')}
+                    </div>
+                    <h3 class="project-title">${project.title}</h3>
+                    <p class="project-desc">${project.desc}</p>
+                </div>
+            `;
+            projectsGrid.appendChild(card);
+        });
+        // Re-initialize AOS for new elements
+        if (window.AOS) AOS.refresh();
+        // Re-attach modal listeners
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.project-link')) return;
+                openProjectModal(card);
+            });
+        });
+    }
+    fetch('projects.json')
+        .then(res => res.json())
+        .then(data => {
+            allProjects = data;
+            renderProjects(allProjects);
+        });
+    // --- FILTER BUTTONS (update to work with dynamic cards) ---
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.getAttribute('data-filter');
+            const filtered = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
+            renderProjects(filtered);
+        });
+    });
+
+    // --- ENSURE BOTH THEME ATTRIBUTES ON LOAD ---
+    if (!body.dataset.themeMode) body.dataset.themeMode = localStorage.getItem('themeMode') || 'light';
+    if (!body.dataset.themeColor) body.dataset.themeColor = localStorage.getItem('themeColor') || 'blue';
+
+    // --- THEME MODE (DARK/LIGHT) LOGIC ---
+    function setThemeMode(mode) {
+        body.dataset.themeMode = mode;
+        localStorage.setItem('themeMode', mode);
+        if (themeToggle) {
+            themeToggle.innerHTML = mode === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        }
+    }
+    themeToggle.addEventListener('click', function() {
+        const newMode = body.dataset.themeMode === 'dark' ? 'light' : 'dark';
+        setThemeMode(newMode);
+    });
+    const savedThemeMode = localStorage.getItem('themeMode') || 'light';
+    setThemeMode(savedThemeMode);
+
+    // --- LIVE THEME SWITCHER LOGIC ---
+    const themeDots = document.querySelectorAll('.theme-dot');
+    function setColorTheme(theme) {
+        body.dataset.themeColor = theme;
+        localStorage.setItem('themeColor', theme);
+        themeDots.forEach(dot => dot.classList.remove('active'));
+        const activeDot = Array.from(themeDots).find(dot => dot.dataset.theme === theme);
+        if (activeDot) activeDot.classList.add('active');
+        // Debug: log current color and computed style
+        console.log('Theme color set:', body.dataset.themeColor, getComputedStyle(body).getPropertyValue('--primary-color'));
+    }
+    themeDots.forEach(dot => {
+        dot.addEventListener('click', function() {
+            setColorTheme(this.dataset.theme);
+        });
+    });
+    const savedColorTheme = localStorage.getItem('themeColor') || 'blue';
+    setColorTheme(savedColorTheme);
+
+    // --- SPOTIFY MODAL DRAGGABLE LOGIC ---
+    const spotifyModal = document.getElementById('spotify-modal');
+    const spotifyHeader = document.getElementById('spotify-modal-header');
+    const spotifyClose = document.querySelector('.spotify-modal-close');
+    const spotifyOpenBtn = document.getElementById('spotify-open-btn');
+    const spotifyMinimize = document.querySelector('.spotify-modal-minimize');
+
+    // Show modal on page load, hide open button
+    if (spotifyModal) {
+        spotifyModal.style.display = 'block';
+        spotifyModal.classList.remove('minimized');
+    }
+    if (spotifyOpenBtn) spotifyOpenBtn.style.display = 'none';
+
+    // Drag logic
+    let isDragging = false, offsetX = 0, offsetY = 0;
+    if (spotifyHeader && spotifyModal) {
+        spotifyHeader.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            const rect = spotifyModal.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            document.body.style.userSelect = 'none';
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                spotifyModal.style.left = (e.clientX - offsetX) + 'px';
+                spotifyModal.style.top = (e.clientY - offsetY) + 'px';
+                spotifyModal.style.right = 'auto';
+                spotifyModal.style.bottom = 'auto';
+                spotifyModal.style.position = 'fixed';
+            }
+        });
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            document.body.style.userSelect = '';
+        });
+    }
+    // Minimize logic
+    if (spotifyMinimize && spotifyModal && spotifyOpenBtn) {
+        spotifyMinimize.addEventListener('click', function() {
+            spotifyModal.classList.add('minimized');
+            spotifyOpenBtn.style.display = 'flex';
+        });
+    }
+    // Close logic
+    if (spotifyClose && spotifyModal && spotifyOpenBtn) {
+        spotifyClose.addEventListener('click', function() {
+            spotifyModal.style.display = 'none';
+            spotifyOpenBtn.style.display = 'flex'; // Always show open button when closed
+            console.log('Spotify modal closed, open button shown');
+        });
+    }
+    // Open button logic
+    if (spotifyOpenBtn && spotifyModal) {
+        spotifyOpenBtn.addEventListener('click', function() {
+            spotifyModal.style.display = 'block';
+            spotifyModal.classList.remove('minimized');
+            spotifyOpenBtn.style.display = 'none'; // Always hide open button when open
+            console.log('Spotify modal opened, open button hidden');
+        });
+    }
+    // Fallback: MutationObserver to always show open button if modal is hidden
+    if (spotifyModal && spotifyOpenBtn) {
+        const observer = new MutationObserver(() => {
+            if (spotifyModal.style.display === 'none') {
+                spotifyOpenBtn.style.display = 'flex';
+            }
+        });
+        observer.observe(spotifyModal, { attributes: true, attributeFilter: ['style'] });
+    }
 });

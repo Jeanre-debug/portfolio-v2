@@ -1,0 +1,68 @@
+[
+  {
+    "title": "E-Commerce Platform",
+    "desc": "A full-stack e-commerce solution with user authentication, payment integration, and admin dashboard.",
+    "image": "Screenshot 2025-04-14 at 15.20.20.png",
+    "tags": ["React", "Node.js", "MongoDB"],
+    "category": "web",
+    "links": [
+      { "url": "#", "icon": "<i class='fas fa-external-link-alt'></i>", "title": "View Live" },
+      { "url": "#", "icon": "<i class='fab fa-github'></i>", "title": "View Code" }
+    ]
+  },
+  {
+    "title": "Finance Management App",
+    "desc": "A cross-platform mobile app for Finance management with real-time synchronization and offline support.",
+    "image": "Screenshot 2025-07-08 at 20.00.04.png",
+    "tags": ["React Native", "Firebase", "Redux"],
+    "category": "mobile",
+    "links": [
+      { "url": "http://jobudget.co.za", "icon": "<i class='fas fa-external-link-alt'></i>", "title": "View Live" },
+      { "url": "#", "icon": "<i class='fab fa-github'></i>", "title": "View Code" }
+    ]
+  },
+  {
+    "title": "Portfolio Website",
+    "desc": "A modern, responsive portfolio website with smooth animations and interactive elements.",
+    "image": "Screenshot 2025-04-14 at 15.28.42.png",
+    "tags": ["Figma", "HTML/CSS", "JavaScript"],
+    "category": "design",
+    "links": [
+      { "url": "#", "icon": "<i class='fas fa-external-link-alt'></i>", "title": "View Live" },
+      { "url": "#", "icon": "<i class='fab fa-github'></i>", "title": "View Code" }
+    ]
+  },
+  {
+    "title": "Asteroids",
+    "desc": "The classic Asteroids game",
+    "image": "Screenshot 2025-07-08 at 20.08.50.png",
+    "tags": ["Vue.js", "Express.js", "PostgreSQL"],
+    "category": "web",
+    "links": [
+      { "url": "https://joasteroids.netlify.app/", "icon": "<i class='fas fa-external-link-alt'></i>", "title": "View Live" },
+      { "url": "#", "icon": "<i class='fab fa-github'></i>", "title": "View Code" }
+    ]
+  },
+  {
+    "title": "Professional Website",
+    "desc": "A modern Food Safety Website for my Business",
+    "image": "Screenshot 2025-07-08 at 20.17.02.png",
+    "tags": ["Flutter", "Dart", "Firebase"],
+    "category": "mobile",
+    "links": [
+      { "url": "https://vital-safetysolutions.netlify.app/", "icon": "<i class='fas fa-external-link-alt'></i>", "title": "View Live" },
+      { "url": "#", "icon": "<i class='fab fa-github'></i>", "title": "View Code" }
+    ]
+  },
+  {
+    "title": "Task Managing App",
+    "desc": "Complete UI/UX design for a modern Task Managing App and user experience with drag and drop functionality.",
+    "image": "Screenshot 2025-07-08 at 20.19.38.png",
+    "tags": ["UI/UX", "Prototyping", "User Research"],
+    "category": "design",
+    "links": [
+      { "url": "https://joflowtasks.netlify.app/", "icon": "<i class='fas fa-external-link-alt'></i>", "title": "View Live" },
+      { "url": "#", "icon": "<i class='fab fa-github'></i>", "title": "View Code" }
+    ]
+  }
+] 
