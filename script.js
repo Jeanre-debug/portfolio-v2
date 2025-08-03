@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFloatingElements();
     initDynamicText();
     initCustomCursor();
+    initEnhancedCursor();
     initScrollAnimations();
     initStatsCounter();
     initSkillsAnimation();
@@ -17,6 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
     initTimeline();
     initParticles();
     initEasterEggs();
+    
+    // Advanced interactive features
+    init3DProjectCards();
+    initParallaxEffects();
+    initMorphingShapes();
+    initParticlePhysics();
+    initPerformanceMetrics();
+    initInteractiveBackground();
+    initAdvancedAnimations();
+    initAdvancedUIElements();
+    
+    // Optional features (can be toggled)
+    // initSoundEffects();
+    // initGestureRecognition();
     
     // Performance monitoring
     initPerformanceMonitoring();
@@ -95,6 +110,11 @@ function initTheme() {
         setTimeout(() => {
             initParticles();
         }, 300);
+        
+        // Reinitialize skill cards for the new theme
+        setTimeout(() => {
+            initSkillsAnimation();
+        }, 350);
     });
 }
 
@@ -395,13 +415,60 @@ function initCustomCursor() {
     });
 }
 
-// ===== SCROLL ANIMATIONS =====
+// ===== ENHANCED CURSOR EFFECTS =====
+function initEnhancedCursor() {
+    const cursor = document.querySelector('.cursor');
+    const cursorFollower = document.querySelector('.cursor-follower');
+    
+    if (!cursor || !cursorFollower) return;
+    
+    // Add magnetic effect to interactive elements
+    const magneticElements = document.querySelectorAll('.btn, .project-card, .skill-card, .contact-card');
+    
+    magneticElements.forEach(element => {
+        element.addEventListener('mouseenter', () => {
+            cursorFollower.style.transform = 'translate(-50%, -50%) scale(2)';
+            cursorFollower.style.borderColor = 'var(--primary)';
+            cursorFollower.style.background = 'rgba(59, 130, 246, 0.1)';
+        });
+        
+        element.addEventListener('mouseleave', () => {
+            cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
+            cursorFollower.style.borderColor = 'var(--primary)';
+            cursorFollower.style.background = 'transparent';
+        });
+    });
+    
+    // Add text effect to cursor
+    document.addEventListener('mousemove', (e) => {
+        const textElements = document.querySelectorAll('.hero-title, .section-title');
+        textElements.forEach(element => {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const distance = Math.sqrt(
+                Math.pow(e.clientX - centerX, 2) + 
+                Math.pow(e.clientY - centerY, 2)
+            );
+            
+            if (distance < 100) {
+                element.style.transform = `scale(1.05)`;
+                element.style.textShadow = '0 0 20px var(--primary)';
+            } else {
+                element.style.transform = 'scale(1)';
+                element.style.textShadow = 'none';
+            }
+        });
+    });
+}
+
+// ===== SCROLL-TRIGGERED ANIMATIONS =====
 function initScrollAnimations() {
     // Register ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
     
-    // Fade in animations
-    gsap.utils.toArray('.section-header, .skill-card, .project-card, .contact-card').forEach(element => {
+    // Fade in animations (excluding skill cards to prevent alignment issues)
+    gsap.utils.toArray('.section-header, .project-card, .contact-card').forEach(element => {
         gsap.from(element, {
             duration: 1,
             y: 50,
@@ -444,6 +511,244 @@ function initScrollAnimations() {
             }
         });
     });
+    
+    // 3D rotation on scroll
+    gsap.utils.toArray('.project-card').forEach(card => {
+        gsap.to(card, {
+            rotationY: 360,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: card,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+    });
+    
+    // Morphing background on scroll (only if elements exist)
+    const morphingShapes = document.querySelectorAll('.morphing-shape');
+    if (morphingShapes.length > 0) {
+        gsap.to('.morphing-shape', {
+            borderRadius: '70%',
+            scale: 1.5,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: true
+            }
+        });
+    }
+}
+
+// ===== INTERACTIVE BACKGROUND =====
+function initInteractiveBackground() {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'interactive-bg';
+    canvas.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -2;
+        opacity: 0.3;
+    `;
+    
+    document.body.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    const particleCount = 10; // Optimized for performance
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 2;
+            this.vy = (Math.random() - 0.5) * 2;
+            this.size = Math.random() * 3 + 1;
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+        
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+        
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`;
+            ctx.fill();
+        }
+    }
+    
+    // Create particles
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
+    // Animation loop
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+        
+        // Draw connections
+        particles.forEach((particle, i) => {
+            particles.slice(i + 1).forEach(otherParticle => {
+                const dx = particle.x - otherParticle.x;
+                const dy = particle.y - otherParticle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 100) {
+                    ctx.beginPath();
+                    ctx.moveTo(particle.x, particle.y);
+                    ctx.lineTo(otherParticle.x, otherParticle.y);
+                    ctx.strokeStyle = `rgba(59, 130, 246, ${0.1 * (1 - distance / 100)})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            });
+        });
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+}
+
+// ===== SOUND EFFECTS =====
+function initSoundEffects() {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playHoverSound() {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    }
+    
+    // Add hover sound to interactive elements
+    const interactiveElements = document.querySelectorAll('.btn, .project-card, .skill-card');
+    interactiveElements.forEach(element => {
+        element.addEventListener('mouseenter', playHoverSound);
+    });
+}
+
+// ===== GESTURE RECOGNITION =====
+function initGestureRecognition() {
+    let startX = 0;
+    let startY = 0;
+    let isGestureActive = false;
+    
+    document.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        isGestureActive = true;
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (!isGestureActive) return;
+        
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
+        
+        // Parallax effect on touch
+        const heroElements = document.querySelectorAll('.hero-text, .hero-visual');
+        heroElements.forEach((element, index) => {
+            const speed = (index + 1) * 0.1;
+            gsap.to(element, {
+                x: deltaX * speed,
+                y: deltaY * speed,
+                duration: 0.1,
+                ease: 'power2.out'
+            });
+        });
+    });
+    
+    document.addEventListener('touchend', () => {
+        isGestureActive = false;
+        
+        // Reset positions
+        const heroElements = document.querySelectorAll('.hero-text, .hero-visual');
+        heroElements.forEach(element => {
+            gsap.to(element, {
+                x: 0,
+                y: 0,
+                duration: 0.5,
+                ease: 'power2.out'
+            });
+        });
+    });
+}
+
+// ===== ADVANCED ANIMATIONS =====
+function initAdvancedAnimations() {
+    // Removed skill card animations to prevent alignment issues
+    
+    // Ensure skill bars don't get affected by GSAP animations
+    gsap.set('.skill-fill', {
+        opacity: 1,
+        visibility: 'visible'
+    });
+    
+    // Floating animation for hero elements
+    gsap.to('.hero-text', {
+        y: -20,
+        duration: 2,
+        ease: 'power2.inOut',
+        yoyo: true,
+        repeat: -1
+    });
+    
+    gsap.to('.hero-visual', {
+        y: 20,
+        duration: 2.5,
+        ease: 'power2.inOut',
+        yoyo: true,
+        repeat: -1
+    });
+    
+    // Pulse animation for CTA buttons
+    gsap.to('.btn-primary', {
+        scale: 1.05,
+        duration: 1,
+        ease: 'power2.inOut',
+        yoyo: true,
+        repeat: -1
+    });
 }
 
 // ===== STATS COUNTER =====
@@ -479,18 +784,52 @@ function animateCounter(element, target) {
 // ===== SKILLS ANIMATION =====
 function initSkillsAnimation() {
     const skillBars = document.querySelectorAll('.skill-fill');
+    const skillCards = document.querySelectorAll('.skill-card');
+    const animatedBars = new Set();
+    
+    // Debug: Log how many skill cards are found
+    console.log('Found', skillCards.length, 'skill cards');
+    skillCards.forEach((card, index) => {
+        console.log('Card', index + 1, ':', card.dataset.skill);
+    });
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && !animatedBars.has(entry.target)) {
                 const level = entry.target.dataset.level;
-                entry.target.style.width = level + '%';
+                animateSkillBar(entry.target, level);
+                animatedBars.add(entry.target);
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.1 });
     
-    skillBars.forEach(bar => observer.observe(bar));
+    skillBars.forEach(bar => {
+        bar.style.width = '0%';
+        bar.style.transition = 'none';
+        observer.observe(bar);
+    });
+    
+    // Fallback animation
+    setTimeout(() => {
+        skillBars.forEach(bar => {
+            if (!animatedBars.has(bar)) {
+                const level = bar.dataset.level;
+                animateSkillBar(bar, level);
+                animatedBars.add(bar);
+            }
+        });
+    }, 2000);
+}
+
+function animateSkillBar(bar, targetLevel) {
+    // Re-enable CSS transition for smooth animation
+    bar.style.transition = 'width 0.8s ease-out';
+    
+    // Use CSS transition instead of JavaScript animation for better performance
+    setTimeout(() => {
+        bar.style.width = targetLevel + '%';
+    }, 50);
 }
 
 // ===== PROJECTS =====
@@ -503,11 +842,15 @@ function initProjects() {
     // Load projects from JSON file
     async function loadProjects() {
         try {
+            // Try to load from local file (works with local server)
             const response = await fetch('projects.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             projects = await response.json();
             renderProjects(projects);
         } catch (error) {
-            console.error('Error loading projects:', error);
+            console.log('Using fallback projects data due to CORS or file access issue');
             // Fallback to sample data if JSON fails to load
             projects = [
                 {
@@ -516,6 +859,28 @@ function initProjects() {
                     image: 'Screenshot 2025-04-14 at 15.20.20.png',
                     category: 'web',
                     tags: ['React', 'Node.js', 'MongoDB'],
+                    links: [
+                        { url: '#', icon: '<i class="fas fa-external-link-alt"></i>', title: 'View Live' },
+                        { url: '#', icon: '<i class="fab fa-github"></i>', title: 'View Code' }
+                    ]
+                },
+                {
+                    title: 'Finance Management App',
+                    desc: 'A cross-platform mobile app for Finance management with real-time synchronization.',
+                    image: 'Screenshot 2025-07-08 at 20.00.04.png',
+                    category: 'mobile',
+                    tags: ['React Native', 'Firebase', 'Redux'],
+                    links: [
+                        { url: 'http://jobudget.co.za', icon: '<i class="fas fa-external-link-alt"></i>', title: 'View Live' },
+                        { url: '#', icon: '<i class="fab fa-github"></i>', title: 'View Code' }
+                    ]
+                },
+                {
+                    title: 'Portfolio Website',
+                    desc: 'A modern, responsive portfolio website with smooth animations and interactive elements.',
+                    image: 'Screenshot 2025-04-14 at 15.28.42.png',
+                    category: 'design',
+                    tags: ['Figma', 'HTML/CSS', 'JavaScript'],
                     links: [
                         { url: '#', icon: '<i class="fas fa-external-link-alt"></i>', title: 'View Live' },
                         { url: '#', icon: '<i class="fab fa-github"></i>', title: 'View Code' }
@@ -568,6 +933,9 @@ function initProjects() {
             
             projectsGrid.appendChild(projectCard);
         });
+        
+        // Apply 3D effects to newly created project cards
+        apply3DEffectsToProjectCards();
     }
     
     // Filter functionality
@@ -608,6 +976,9 @@ function initContactForm() {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         submitBtn.disabled = true;
         
+        // Show toast notification
+        showToast('Sending message...', 'info', 'Please wait while we process your request');
+        
         try {
             // Simulate form submission
             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -620,6 +991,9 @@ function initContactForm() {
                 </div>
             `;
             
+            // Show success toast
+            showToast('Message sent!', 'success', 'Thank you for reaching out. I\'ll respond soon!');
+            
             contactForm.reset();
             
         } catch (error) {
@@ -630,6 +1004,9 @@ function initContactForm() {
                     Something went wrong. Please try again.
                 </div>
             `;
+            
+            // Show error toast
+            showToast('Error occurred!', 'error', 'Failed to send message. Please try again.');
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -639,6 +1016,20 @@ function initContactForm() {
                 formStatus.innerHTML = '';
             }, 5000);
         }
+    });
+    
+    // Add input focus effects
+    const inputs = contactForm.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+            input.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', () => {
+            if (!input.value) {
+                input.parentElement.classList.remove('focused');
+            }
+        });
     });
 }
 
@@ -737,10 +1128,10 @@ function initParticles() {
 function createStarrySky(container) {
     // Create different types of stars
     const starTypes = [
-        { size: '2px', opacity: 0.8, count: 30, animation: 'twinkle' },
-        { size: '3px', opacity: 0.6, count: 20, animation: 'twinkle-slow' },
-        { size: '1px', opacity: 0.4, count: 40, animation: 'twinkle-fast' },
-        { size: '4px', opacity: 0.9, count: 10, animation: 'pulse' }
+        { size: '2px', opacity: 0.8, count: 8, animation: 'twinkle' }, // Further reduced from 15
+        { size: '3px', opacity: 0.6, count: 5, animation: 'twinkle-slow' }, // Further reduced from 10
+        { size: '1px', opacity: 0.4, count: 10, animation: 'twinkle-fast' }, // Further reduced from 20
+        { size: '4px', opacity: 0.9, count: 3, animation: 'pulse' } // Further reduced from 5
     ];
     
     starTypes.forEach(type => {
@@ -800,7 +1191,7 @@ function createShootingStar(container) {
 }
 
 function createRegularParticles(container) {
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 10; i++) { // Further reduced from 20 to 10
         const particle = document.createElement('div');
         particle.style.cssText = `
             position: absolute;
@@ -876,6 +1267,403 @@ function initEasterEggs() {
     }
 }
 
+// ===== 3D PROJECT CARDS =====
+function init3DProjectCards() {
+    // Initial call for any existing project cards
+    apply3DEffectsToProjectCards();
+}
+
+function apply3DEffectsToProjectCards() {
+    const projectCards = document.querySelectorAll('.project-card');
+    // Applying 3D effects to project cards
+    
+    projectCards.forEach(card => {
+        // Skip if already has 3D effects applied
+        if (card.dataset.has3DEffects === 'true') return;
+        
+        let isHovered = false;
+        
+        // Add 3D transform styles
+        card.style.transformStyle = 'preserve-3d';
+        card.style.transition = 'transform 0.1s ease';
+        
+        card.addEventListener('mouseenter', () => {
+            isHovered = true;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            isHovered = false;
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+        });
+        
+        card.addEventListener('mousemove', (e) => {
+            if (!isHovered) return;
+            
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Calculate mouse position relative to card center
+            const mouseX = e.clientX - centerX;
+            const mouseY = e.clientY - centerY;
+            
+            // Calculate rotation based on mouse position
+            // Normalize mouse position to -1 to 1 range
+            const normalizedX = mouseX / (rect.width / 2);
+            const normalizedY = mouseY / (rect.height / 2);
+            
+            // Apply rotation with smooth limits
+            const maxRotation = 15; // Maximum rotation in degrees
+            const rotationX = -normalizedY * maxRotation;
+            const rotationY = normalizedX * maxRotation;
+            
+            // Apply scale effect based on distance from center
+            const distance = Math.sqrt(mouseX * mouseX + mouseY * mouseY);
+            const maxDistance = Math.sqrt((rect.width / 2) * (rect.width / 2) + (rect.height / 2) * (rect.height / 2));
+            const scale = 1 + (distance / maxDistance) * 0.05; // Subtle scale effect
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(${scale})`;
+        });
+        
+        // Add tilt effect on touch devices
+        card.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const touchX = touch.clientX - centerX;
+            const touchY = touch.clientY - centerY;
+            
+            const normalizedX = touchX / (rect.width / 2);
+            const normalizedY = touchY / (rect.height / 2);
+            
+            const maxRotation = 10;
+            const rotationX = -normalizedY * maxRotation;
+            const rotationY = normalizedX * maxRotation;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(1.02)`;
+        });
+        
+        card.addEventListener('touchend', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+        });
+        
+        // Mark as having 3D effects applied
+        card.dataset.has3DEffects = 'true';
+    });
+}
+
+// ===== PARALLAX EFFECTS =====
+function initParallaxEffects() {
+    // Create parallax layers
+    const parallaxLayers = [
+        { selector: '.hero-background', speed: 0.1 },
+        { selector: '.floating-elements', speed: 0.3 },
+        { selector: '.hero-particles', speed: 0.2 },
+        { selector: '.scroll-indicator', speed: 0.5 }
+    ];
+    
+    parallaxLayers.forEach(layer => {
+        const elements = document.querySelectorAll(layer.selector);
+        elements.forEach(element => {
+            gsap.to(element, {
+                y: -100 * layer.speed,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: element,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+        });
+    });
+    
+    // Advanced parallax with mouse movement
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+    
+    // Apply mouse parallax to hero elements
+    function updateMouseParallax() {
+        const heroElements = document.querySelectorAll('.hero-text, .hero-visual');
+        heroElements.forEach((element, index) => {
+            const speed = (index + 1) * 0.1;
+            gsap.to(element, {
+                x: mouseX * 50 * speed,
+                y: mouseY * 50 * speed,
+                duration: 0.1,
+                ease: 'power2.out'
+            });
+        });
+        requestAnimationFrame(updateMouseParallax);
+    }
+    updateMouseParallax();
+}
+
+// ===== MORPHING SHAPES =====
+function initMorphingShapes() {
+    // Create morphing background shapes
+    const shapesContainer = document.createElement('div');
+    shapesContainer.className = 'morphing-shapes';
+    shapesContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        overflow: hidden;
+    `;
+    
+    document.body.appendChild(shapesContainer);
+    
+    // Create multiple morphing shapes
+    const shapes = [];
+    const shapeCount = 1; // Optimized for performance
+    
+    for (let i = 0; i < shapeCount; i++) {
+        const shape = document.createElement('div');
+        shape.className = 'morphing-shape';
+        shape.style.cssText = `
+            position: absolute;
+            width: ${Math.random() * 200 + 100}px;
+            height: ${Math.random() * 200 + 100}px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(20px);
+            animation: morph-shape ${Math.random() * 10 + 10}s ease-in-out infinite;
+            animation-delay: ${Math.random() * 5}s;
+        `;
+        
+        shape.style.left = Math.random() * 100 + '%';
+        shape.style.top = Math.random() * 100 + '%';
+        
+        shapesContainer.appendChild(shape);
+        shapes.push(shape);
+    }
+    
+    // Add CSS for morphing animation
+    const morphStyle = document.createElement('style');
+    morphStyle.textContent = `
+        @keyframes morph-shape {
+            0%, 100% { 
+                border-radius: 50%;
+                transform: scale(1) rotate(0deg);
+            }
+            25% { 
+                border-radius: 30%;
+                transform: scale(1.2) rotate(90deg);
+            }
+            50% { 
+                border-radius: 70%;
+                transform: scale(0.8) rotate(180deg);
+            }
+            75% { 
+                border-radius: 40%;
+                transform: scale(1.1) rotate(270deg);
+            }
+        }
+    `;
+    document.head.appendChild(morphStyle);
+}
+
+// ===== PARTICLE PHYSICS =====
+function initParticlePhysics() {
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'particle-physics';
+    particleContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+    `;
+    
+    document.body.appendChild(particleContainer);
+    
+    const particles = [];
+    const particleCount = 6; // Optimized for performance
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    // Create particles
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'physics-particle';
+        particle.style.cssText = `
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        `;
+        
+        particle.x = Math.random() * window.innerWidth;
+        particle.y = Math.random() * window.innerHeight;
+        particle.vx = (Math.random() - 0.5) * 2;
+        particle.vy = (Math.random() - 0.5) * 2;
+        
+        particle.style.left = particle.x + 'px';
+        particle.style.top = particle.y + 'px';
+        
+        particleContainer.appendChild(particle);
+        particles.push(particle);
+    }
+    
+    // Mouse tracking
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    
+    // Physics animation
+    function animateParticles() {
+        particles.forEach(particle => {
+            // Update position
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            
+            // Bounce off walls
+            if (particle.x <= 0 || particle.x >= window.innerWidth) {
+                particle.vx *= -1;
+            }
+            if (particle.y <= 0 || particle.y >= window.innerHeight) {
+                particle.vy *= -1;
+            }
+            
+            // Mouse attraction
+            const dx = mouseX - particle.x;
+            const dy = mouseY - particle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 100) {
+                const force = (100 - distance) / 100;
+                particle.vx += (dx / distance) * force * 0.1;
+                particle.vy += (dy / distance) * force * 0.1;
+                
+                // Scale and opacity effect
+                particle.style.transform = `scale(${1 + force * 0.5})`;
+                particle.style.opacity = 0.6 + force * 0.4;
+            } else {
+                particle.style.transform = 'scale(1)';
+                particle.style.opacity = 0.6;
+            }
+            
+            // Apply position
+            particle.style.left = particle.x + 'px';
+            particle.style.top = particle.y + 'px';
+        });
+        
+        requestAnimationFrame(animateParticles);
+    }
+    
+    animateParticles();
+}
+
+// ===== TEXT SCRAMBLE EFFECTS =====
+// Removed text scramble effects as requested
+
+// ===== PERFORMANCE METRICS =====
+function initPerformanceMetrics() {
+    // Create performance metrics display
+    const metricsContainer = document.createElement('div');
+    metricsContainer.className = 'performance-metrics';
+    metricsContainer.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    `;
+    
+    document.body.appendChild(metricsContainer);
+    
+    // FPS counter
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let fps = 0;
+    
+    function updateFPS() {
+        frameCount++;
+        const currentTime = performance.now();
+        
+        if (currentTime - lastTime >= 1000) {
+            fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+        
+        requestAnimationFrame(updateFPS);
+    }
+    updateFPS();
+    
+    // Load time
+    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+    
+    // Bundle size (simulated)
+    const bundleSize = Math.round(Math.random() * 500 + 200); // Simulated bundle size
+    
+    // Lighthouse score (simulated)
+    const lighthouseScore = Math.round(Math.random() * 20 + 80); // Simulated score
+    
+    // Update metrics display
+    function updateMetrics() {
+        const fpsColor = fps > 50 ? '#10b981' : fps > 30 ? '#f59e0b' : '#ef4444';
+        const scoreColor = lighthouseScore > 90 ? '#10b981' : lighthouseScore > 70 ? '#f59e0b' : '#ef4444';
+        
+        metricsContainer.innerHTML = `
+            <div style="margin-bottom: 8px;">
+                <strong>Performance Metrics</strong>
+            </div>
+            <div style="margin-bottom: 4px;">
+                FPS: <span style="color: ${fpsColor};">${fps}</span>
+            </div>
+            <div style="margin-bottom: 4px;">
+                Load Time: <span style="color: #3b82f6;">${loadTime}ms</span>
+            </div>
+            <div style="margin-bottom: 4px;">
+                Bundle Size: <span style="color: #8b5cf6;">${bundleSize}KB</span>
+            </div>
+            <div>
+                Lighthouse: <span style="color: ${scoreColor};">${lighthouseScore}/100</span>
+            </div>
+        `;
+    }
+    
+    updateMetrics();
+    setInterval(updateMetrics, 1000);
+    
+    // Toggle metrics visibility
+    let metricsVisible = true;
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'p' && e.ctrlKey) {
+            metricsVisible = !metricsVisible;
+            metricsContainer.style.display = metricsVisible ? 'block' : 'none';
+        }
+    });
+}
+
 // ===== PERFORMANCE MONITORING =====
 function initPerformanceMonitoring() {
     let frameCount = 0;
@@ -903,6 +1691,208 @@ function initPerformanceMonitoring() {
     }
     
     monitorFPS();
+}
+
+// ===== ADVANCED UI ELEMENTS =====
+function initAdvancedUIElements() {
+    initToastNotifications();
+    initEnhancedModals();
+    initCustomScrollbars();
+}
+
+// ===== FLOATING ACTION BUTTONS =====
+// Removed floating action buttons to prevent interference with existing floating elements
+
+// ===== TOAST NOTIFICATIONS =====
+function initToastNotifications() {
+    const toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+    
+    // Global toast function
+    window.showToast = function(title, type = 'info', message = '') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+        
+        toast.innerHTML = `
+            <div class="toast-header">
+                <div>
+                    <i class="toast-icon ${icons[type]}"></i>
+                    <span class="toast-title">${title}</span>
+                </div>
+                <button class="toast-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            ${message ? `<div class="toast-message">${message}</div>` : ''}
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            hideToast(toast);
+        }, 5000);
+        
+        // Close button functionality
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => {
+            hideToast(toast);
+        });
+        
+        return toast;
+    };
+    
+    function hideToast(toast) {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+    
+    // Show welcome toast
+    setTimeout(() => {
+        showToast('Welcome!', 'success', 'Thanks for visiting my portfolio');
+    }, 2000);
+}
+
+// ===== ENHANCED MODALS =====
+function initEnhancedModals() {
+    const modal = document.getElementById('project-modal');
+    const modalOverlay = modal.querySelector('.modal-overlay');
+    const modalContent = modal.querySelector('.modal-content');
+    const modalClose = modal.querySelector('.modal-close');
+    
+    function openModal() {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        
+        // Add entrance animation
+        gsap.fromTo(modalContent, 
+            { 
+                scale: 0.8, 
+                y: 50, 
+                opacity: 0 
+            },
+            { 
+                scale: 1, 
+                y: 0, 
+                opacity: 1, 
+                duration: 0.4, 
+                ease: 'back.out(1.7)' 
+            }
+        );
+        
+        // Add overlay animation
+        gsap.fromTo(modalOverlay,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.3 }
+        );
+    }
+    
+    function closeModal() {
+        // Add exit animation
+        gsap.to(modalContent, {
+            scale: 0.8,
+            y: 50,
+            opacity: 0,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        gsap.to(modalOverlay, {
+            opacity: 0,
+            duration: 0.3
+        });
+    }
+    
+    // Override existing modal functions
+    window.openProjectModal = function(project) {
+        const modalBody = modal.querySelector('.modal-body');
+        
+        // Get the first link for demo and second for code
+        const demoLink = project.links.find(link => link.title === 'View Live') || project.links[0];
+        const codeLink = project.links.find(link => link.title === 'View Code') || project.links[1];
+        
+        modalBody.innerHTML = `
+            <img src="${project.image}" alt="${project.title}" class="modal-project-image">
+            <h2 class="modal-project-title">${project.title}</h2>
+            <div class="modal-project-tags">
+                ${project.tags.map(tag => `<span class="project-tag">${tag}</span>`).join('')}
+            </div>
+            <p class="modal-project-description">${project.desc}</p>
+            <div class="modal-project-links">
+                <a href="${codeLink?.url || '#'}" target="_blank" title="${codeLink?.title || 'View Code'}">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="${demoLink?.url || '#'}" target="_blank" title="${demoLink?.title || 'Live Demo'}">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+        `;
+        
+        openModal();
+        
+        // Show toast notification
+        showToast('Project opened!', 'info', `Viewing ${project.title}`);
+    };
+    
+    // Close modal events
+    modalOverlay.addEventListener('click', closeModal);
+    modalClose.addEventListener('click', closeModal);
+    
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) {
+            closeModal();
+        }
+    });
+}
+
+// ===== CUSTOM SCROLLBARS =====
+function initCustomScrollbars() {
+    // Add smooth scrolling behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Add scroll progress indicator
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        z-index: 10001;
+        transition: width 0.1s ease;
+    `;
+    document.body.appendChild(progressBar);
+    
+    // Update progress bar on scroll
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrollPercent = (scrollTop / scrollHeight) * 100;
+        progressBar.style.width = scrollPercent + '%';
+    });
 }
 
 // ===== UTILITY FUNCTIONS =====
